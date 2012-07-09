@@ -1,0 +1,13 @@
+syntax: glob
+
+.DS_Store
+*.pyc
+*.swp
+*.swo
+*.un~
+.ropeproject
+tags
+docs/build
+MANIFEST
+build/
+dist/

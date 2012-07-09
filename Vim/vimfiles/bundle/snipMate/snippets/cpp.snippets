@@ -1,0 +1,69 @@
+# Read File Into Vector
+snippet readfile
+	std::vector<char> v;
+	if (FILE *${2:fp} = fopen(${1:"filename"}, "r")) {
+		char buf[1024];
+		while (size_t len = fread(buf, 1, sizeof(buf), $2))
+			v.insert(v.end(), buf, buf + len);
+		fclose($2);
+	}${3}
+# std::map
+snippet map
+	std::map<${1:key}, ${2:value}> map${3};
+# std::vector
+snippet vector
+	std::vector<${1:char}> v${2};
+# Namespace
+snippet ns
+	namespace ${1:`Filename('', 'my')`} {
+		${2}
+	} /* $1 */
+# Class
+snippet cl
+	class ${1:`Filename('$1_t', 'name')`} {
+	public:
+		$1 (${2:arguments});
+		virtual ~$1 ();
+
+	private:
+		${3:/* data */}
+	};
+
+snippet class
+	class ${1:`Filename('$1_t', 'name')`} {
+	public:
+		$1 (${2:arguments});
+		virtual ~$1 ();
+
+	private:
+		${3:/* data */}
+	};
+
+snippet try
+	try {
+		${1:/* code */}
+	} catch (${2:exception}) {
+		${3:/* code */}
+	}
+
+# range based for ( C++11 feature )
+#snippet for_CPP11
+#for (${1:var} : ${2:container}) {
+#	${3:/* code */}
+#}
+
+# lambda expression ( C++11 feature )
+#abbr        [](){}
+snippet lambda
+	[${1}](${2})${3}{ ${4} }
+
+# scoped enumeration ( C++11 feature )
+#abbr        enum struct {}
+snippet enum_scoped
+	enum struct {
+		${1:var}
+	}
+
+#abbr        template <T>
+snippet template
+	template<typename ${1:T}>

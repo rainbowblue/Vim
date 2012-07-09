@@ -1,0 +1,655 @@
+" new items marked *N* , corrected items marked *C*
+" searching
+/joe/e             : cursor set to End of match
+/joe/e+1           : cursor set to End of match plus 1
+/joe/s-2           : cursor set to Start of match minus 2
+/joe/+3            : find joe move cursor 3 lines down
+/^joe.*fred.*bill/ : find joe AND fred AND Bill (Joe at start of line)
+/^[A-J]/           : search for lines beginning with one or more A-J
+/begin\_.*end      : search over possible multiple lines
+/fred\_s*joe/      : any whitespace including newline *C*
+/fred\|joe         : Search for FRED OR JOE
+/.*fred\&.*joe     : Search for FRED AND JOE in any ORDER!
+/\<fred\>/         : search for fred but not alfred or frederick *C*
+/\<\d\d\d\d\>      : Search for exactly 4 digit numbers
+/\D\d\d\d\d\D      : Search for exactly 4 digit numbers
+/\<\d\{4}\>        : same thing
+/\([^0-9]\|^\)%.*% : Search for absence of a digit or beginning of line
+
+" finding empty lines
+/^\n\{3}                     : find 3 empty lines
+/^str.*\nstr                 : find 2 successive lines starting with str
+/\(^str.*\n\)\{2}           :  find 2 successive lines starting with str
+" using rexexp memory in a search
+/\(fred\).*\(joe\).*\2.*\1
+" Repeating the Regexp (rather than what the Regexp finds)
+/^\([^,]*,\)\{8}
+" visual searching
+:vmap // y/<C-R>"<CR>       : search for visually highlighted text
+:vmap <silent> //     y/<C-R>=escape(@", '\\/.*$^~[]')<CR><CR> : with spec chars
+" \zs and \ze regex delimiters :h /\zs
+/<\zs[^>]*\ze>               : search for tag contents, ignoring chevrons
+" zero-width :h /\@=
+/<\@<=[^>]*>\@=             : search for tag contents, ignoring chevrons
+/<\@<=\_[^>]*>\@=           : search for tags across possible multiple lines
+" searching over multiple lines \_ means including newline
+/<!--\_p\{-}-->                   : search for multiple line comments
+/fred\_s*joe/                     : any whitespace including newline *C*
+/bugs\(\_.\)*bunny                 : bugs followed by bunny anywhere in file
+:h \_                             : help
+" search for declaration of subroutine/function under cursor
+:nmap gx yiw/^\(sub\<bar>function\)\s\+<C-R>"<CR>
+" multiple file search
+:bufdo /searchstr/                 : use :rewind to recommence search
+>注释
+bufdo 在所有缓冲区执行后面的命令,可以用|连接多个命令
+:h bufdo
+<
+" multiple file search better but cheating
+:bufdo %s/searchstr/&/gic   : say n and then a to stop
+>注释
+:h :s
+这是用替换代替查找的方法,其中的~&~表示前面匹配的内容,也就是说,实际上是用自己替换自己,相当于没替换.那为什么要"多此一举"呢?因为后面的~gic~,这是三个选项,g表示替换所有找到的匹配,i表示忽略大小写,c表示每次替换都要经过确认.如果只是用查找,那不能用这三个选项.这样执行的话,就会把所有匹配的内容走一遍(按n再按a可以停止).
+另外还有一个好处,替换是有计数的,结束的时候,会显示一共替换了多少次,其实也就是找到了多少个匹配.
+<
+" How to search for a URL without backslashing
+?http://www.vim.org/        : (first) search BACKWARDS!!! clever huh!
+>注释
+:h ?
+用反向查找,避免输入太多反斜杆
+如果用反斜杆来写,那要写成~/http:\/\/www.vim.org\/~看起来乱了点
+<
+" Specify what you are NOT searching for (vowels)
+/\c\v([^aeiou]&\a){4}       : search for 4 consecutive consonants
+>注释
+:h /\c
+:h /\v
+:h /\&
+:h /\a
+:h /\{
+查找4个连续的非元音字母,\c表示忽略大小写,\v是使后面的表达式中,除了字母数字下划线外,都认为是特殊符号,使得如+,&,|等不需要在前面加\转义.
+括号中规定了两个必须同时满足的条件,~[^aeiou]~表示非元音字母的字符,~\a~表示所有字母,合起来就是非元音的字母,最后的~{4}~表示匹配四次
+<
+/\%>20l\%<30lgoat           : Search for goat between lines 20 and 30 *N*
+>注释
+:h \%l
+在第20到30行中匹配后面的内容
+<
+/^.\{-}home.\{-}\zshome/e   : match only the 2nd occurence in a line of "home" *N*
+>注释
+:h /\{-
+:h /\zs
+匹配第二次出现的home,~\{-}~表示非贪婪匹配,~\zs~表示从这个位置开始匹配,这是个"零长度匹配"
+<
+:%s/home.\{-}\zshome/alone   : Substitute only the occurrence of home in any line *N*
+>注释
+:h :s
+和上面一样,不过这次是替换,把第二个home替换为alone
+<
+" find str but not on lines containing tongue
+^\(.*tongue.*\)\@!.*nose.*$
+>注释
+:h /\@!
+~\@!~这个又是一个"零长度匹配",表示匹配不包含前面内容地方
+整个句子的意思,是匹配所有不包括tongue,但是包括nose的行
+<
+\v^((tongue)@!.)*nose((tongue)@!.)*$
+.*nose.*\&^\%(\%(tongue\)\@!.\)*$
+>注释
+:h /\%(\)
+这两句都是和上面那句同样的功能,第三句有个特殊的用法~\%(~和~\)~,这两个是配对的,和~\(\)~差不多,但是有%的不作为一个子表达式(也就是说,不能在后面用\1~\9来表示),速度也会快一点
+<
+:v/tongue/s/nose/&/gic
+>注释
+:h :v
+:h :g
+~:v~相当于~:g!~,就是对所有!!不满足!!后面的条件的行,执行命令
+在本句中,条件是包含有tongue,命令是替换nose为nose(也就是不替换).
+
+
+
+
+
+
+
+
+
+
+
+"substitution
+:%s/fred/joe/igc             : general substitute command
+:%s//joe/igc                 : Substitute what you last searched for *N*
+:%s/~/sue/igc               : Substitute your last replacement string for *N*
+:%s/\r//g                   : Delete DOS returns ^M
+" Is your Text File jumbled onto one line? use following
+:%s/\r/\r/g                 : Turn DOS returns ^M into real returns
+:%s=   *$==                   : delete end of line blanks
+:%s= \+$==                   : Same thing
+:%s#\s*\r\?$##               : Clean both trailing spaces AND DOS returns
+:%s#\s*\r*$##               : same thing
+" deleting empty lines
+:%s/^\n\{3}//               : delete blocks of 3 empty lines
+:%s/^\n\+/\r/               : compressing empty lines
+>注释
+这里要注意,查找的是~\n~,但是替换为了~\r~,据说是由于历史原因造成的
+<
+:%s#<[^>]\+>##g             : delete html tags, leave text (non-greedy)
+:%s#<\_.\{-1,}>##g           : delete html tags possibly multi-line (non-greedy)
+" VIM Power Substitute
+:'a,'bg/fred/s/dick/joe/igc : VERY USEFUL
+>注释
+:h m
+:h :g
+在标记为a和b之间的部分进行后面的命令,标记就是书签,可以用~mx~(x可以为26个字母)定义
+用g/先找到所有包含fred的行,然后再进行替换,把dick替换为joe
+<
+" duplicating columns
+:%s= [^ ]\+$=&&=             : duplicate end column
+:%s= \f\+$=&&=               : same thing
+:%s= \S\+$=&&               : usually the same
+>注释
+:h &
+:h /\f
+:h /\S
+复制最后一部分,匹配行末的一个空格加上非空白字符,替换为两份
+<
+" memory
+%s#.*\(tbl_\w\+\).*#\1#     : produce a list of all strings tbl_*   *N*
+>注释
+去除tbl_XXX以外的部分
+<
+:s/\(.*\):\(.*\)/\2 : \1/   : reverse fields separated by :
+>注释
+:h /\1
+交换以冒号分隔的两部分
+<
+:%s/^\(.*\)\n\1$/\1/         : delete duplicate lines
+>注释
+删除重复的行,注意,如果是三行重复,只会删除第2行
+<
+" non-greedy matching \{-}
+:%s/^.\{-}pdf/new.pdf/       : delete to 1st pdf only
+>注释
+:h \{-}
+替换第一个出现的pdf之前的内容为new.pdf
+<
+" use of optional atom \?
+:%s#\<[zy]\?tbl_[a-z_]\+\>#\L&#gc : lowercase with optional leading characters
+>注释
+:h /\?
+:h /\L
+:h /[]
+把前面有0~1个z或y的tbl_XXX全部转换为小写字母
+<
+" over possibly many lines
+:%s/<!--\_.\{-}-->//         : delete possibly multi-line comments
+:help /\{-}                 : help non-greedy
+>注释
+:h /\{-}
+:h /\_
+删除尽可能少的注释,~\_.~匹配任意字符(包括换行符),~\{-}~是非贪婪匹配
+<
+" substitute using a register
+:s/fred/<c-r>a/g             : sub "fred" with contents of register "a"
+:s/fred/<c-r>asome_text<c-r>s/g
+:s/fred/\=@a/g               : better alternative as register not displayed
+>注释
+:h <c-r>
+:h sub-replace-\=
+:h @
+替换fred为寄存器的内容,~<c-r>~不是直接输入,而是要按Ctrl+r,这时在光标下面会有一个双引号,再按一个字母后,这个字母指定的寄存器的内容就粘贴到当前的位置,这里需要注意的是,粘贴过来的内容会有一些特殊符号,可能需要转义,或者用escape函数也可以.第三种方法是最好的,不需要把寄存器的内容显示出来,这样也就不需要考虑转义了.
+<
+" multiple commands on one line
+:%s/\f\+\.gif\>/\r&\r/g | v/\.gif$/d | %s/gif/jpg/
+>注释
+:h /\f
+:h :v
+这里是三条命令,可以用|连接多条命令,写在同一行
+第一条命令是把所有.gif文件名前后都加个换行符,其中~\f~表示可以作为文件名的字符
+第二条命令是找到所有不包含.gif的行,将他们删除,其中~v/~等价于~g!/~
+第三条命令是替换gif为jpg
+<
+:%s/a/but/gie|:update|:next : then use @: to repeat
+>注释
+:h :s_flags
+:h :update
+:h :next
+同样是三条命令合成一行
+第一条命令将a换成but,最后的e表示忽略错误,具体见~:h :s_flags~
+后面两条命令见帮助
+注意,用@:可以重复上面的三条命令
+<
+" ORing
+:%s/suck\|buck/loopy/gc     : ORing (must break pipe)
+>注释
+:h /\|
+将suck或buck替换成loopy,这里不需要括号
+<
+:%s/\v(.*\n){5}/&\r         : insert a blank line every 5 lines *N*
+>注释
+:h /\v
+:h :&
+每5行插入一个换行符
+<
+" Calling a VIM function
+:s/__date__/\=strftime("%c")/ : insert datestring
+>注释
+:h sub-replace-\=
+:h strftime
+替换__date__为当前时间,具体见~:h strftime~,~\=~是执行后面的表达式
+<
+" Working with Columns sub any str1 in col3
+:%s:\(\(\w\+\s\+\)\{2}\)str1:\1str2:
+>注释
+:h /\1
+替换第三列的str1为str2,这里说的列,是指用空白字符分隔的每组为一列.其实也不一定是要第三列,只要在第三列以上的都可以,而且匹配一次之后,向后三列如果还能找到str1,也可以替换
+另外,~\1~代表外层括号的内容,~\2~代表第二次匹配的内层括号,如aaa bbb str1,~\1~表示"aaa bbb ",~\2~表示"bbb "
+<
+" Swapping first & last column (4 columns)
+:%s:\(\w\+\)\(.*\s\+\)\(\w\+\)$:\3\2\1:
+>注释
+交换第一列和最后一列,还是用空白字符区分的列
+<
+" filter all form elements into paste register
+:redir @*|sil exec 'g#<\(input\|select\|textarea\|/\=form\)\>#p'|redir END
+>注释
+:h redir
+:h sil
+一共三个命令,用~|~分隔
+第一个命令是重定向输出到*号寄存器,也就是把后面命令的执行结果,输出到*号寄存器,同时也会输出到文件中,除非有<silent>符号
+第二个命令是用exec执行一个命令,前面的sil表示<silent>,也就是后面的输出不输出到文件中.exec执行的命令是找到含有<input或<select或<textarea或/form的行,然后用p粘贴
+第三个命令是结束重定向
+<
+:nmap ,z :redir @*<Bar>sil exec 'g@<\(input\<Bar>select\<Bar>textarea\<Bar>/\=form\)\>@p'<Bar>redir END<CR>
+>注释
+:h nmap
+:h <bar>
+这里是建立一个快捷键的映射,把上面的命令定义了一个快捷键,需要注意的是,这里需要用~<Bar>~来代替~|~
+<
+" substitute string in column 30 *N*
+:%s/^\(.\{30\}\)xx/\1yy/
+>注释
+:h
+替换第31和32列的xx为yy,这里的列是一个字符算一列
+<
+" decrement numbers by 3
+:%s/\d\+/\=(submatch(0)-3)/
+>注释
+:h submatch
+将每行找到的第一个数字减去3,注意,因为后面没有g,所以只替换每行的第一个数字,后面的不管
+submatch(0)指前面匹配到的所有内容
+<
+" increment numbers by 6 on certain lines only
+:g/loc\|function/s/\d/\=submatch(0)+6/
+" better
+:%s#txtdev\zs\d#\=submatch(0)+1#g
+:h /\zs
+>注释
+:h /\zs
+这两句都是替换满足条件的行中的数字
+上面一句是要求行中要出现loc或者function
+下面一句是要求txtdev后面紧跟的一个数字,~\zs~表示匹配从这里开始
+<
+" increment only numbers gg\d\d   by 6 (another way)
+:%s/\(gg\)\@<=\d\+/\=submatch(0)+6/
+:h zero-width
+>注释
+:h \@<=
+替换所有紧跟在gg后面的数字,~\@<=~是一个"零长度匹配",他前面的内容只是一个要求,但不作为匹配的部分,和上面用~\zs~效果是完全一样的,另外,他前面的括号也不能作为一个子匹配,在后面用~\1~是不能指代这个部分的内容,具体查看~:h \@<=~
+<
+" rename a string with an incrementing number
+:let i=10 | 'a,'bg/Abc/s/yy/\=i/ |let i=i+1 # convert yy to 10,11,12 etc
+>注释
+:h 'a
+在标记a和标记b之间的,含有Abc的行,找到yy,并替换成10,11,12....
+<
+" as above but more precise
+:let i=10 | 'a,'bg/Abc/s/xx\zsyy\ze/\=i/ |let i=i+1 # convert xxyy to xx11,xx12,xx13
+>注释
+:h /\zs
+:h /\ze
+同上,但是要求yy前面还要有xx才进行替换,其中~\zs~表示匹配开始,~ze~表示匹配结束
+<
+" find replacement text, put in memory, then use \zs to simplify substitute
+:%s/"\([^.]\+\).*\zsxx/\1/
+>注释
+将xx替换为前面括号匹配到的内容(注意,对于整个表达式来说,~\zs~前面的都不算是匹配的内容,但是对子匹配来说,第一个括号里面的内容就是~\1~),前面的括号中,匹配的是双引号后紧跟的一个或一个以上的非小数点的字符
+<
+" Pull word under cursor into LHS of a substitute
+:nmap <leader>z :%s#\<<c-r>=expand("<cword>")<cr>\>#
+>注释
+:h
+这是一个映射,让当前光标下的单词作为被替换的内容,等待输入要替换成的内容
+~expand("<cword>")~表示的是当前光标所在位置的单词.这里的~<C-r>~还有~<cword>~都是直接输入的
+可以自己在命令行里面试试,按~Ctrl-r~,再按~=~,然后就可以输入函数了
+注意~<leader>~是自己定义的一个快捷键起始键,具体可~:h leader~
+<
+" Pull Visually Highlighted text into LHS of a substitute
+:vmap <leader>z :<C-U>%s/\<<c-r>*\>/
+>注释
+:h
+这句有错误,我试了一下,不能实现,可能是作者的<C-U>有个什么映射,而我没有
+作者的目的是将可视模式下高亮的内容作为被替换的内容,我改了一个
+~~:vmap <leader>z y:%s/\<<C-r>0\>/
+~y~是复制,默认是复制到~0~寄存器,然后用~<C-r>0~就可以取出刚才复制的内容了
+<
+" substitute singular or plural
+:'a,'bs/bucket\(s\)*/bowl\1/gic   *N*
+>注释
+:h 'a
+将标记a和标记b中间的bucket替换成bowl,等价于~:'a,'bs/bucket/bowl/igc~''看作者注释的意思,似乎是要转换单复数,但是实际并不是这个效果
+<
+----------------------------------------
+" all following performing similar task, substitute within substitution
+" Multiple single character substitution in a portion of line only
+:%s,\(all/.*\)\@<=/,_,g     : replace all / with _ AFTER "all/"
+>注释
+:h \@<=
+替换!!所有!!在~all/~后的~/~为~_~
+这个句子要注意的地方是,分隔符号用的是逗号,因为表达式里面用到了~/~
+另外,对于~\@<=~,这个"零长度匹配"的执行顺序,是先执行它后面的内容,然后在检查前面是否能满足要求,比如对~XXXall/XXX/XXX/XXX~,先找到第一个~/~,发现前面找不到满足~\(all/.*\)~的匹配,则忽略,又碰到第二个~/~,这次前面可以找到满足~\(all/.*\)~的匹配了,所以替换这个~\~为~_~,再看到第三个~/~,和第二个同样满足,所以也替换掉了
+<
+" Same thing
+:s#all/\zs.*#\=substitute(submatch(0), '/', '_', 'g')#
+>注释
+:h substutute
+:h submatch
+:h /\zs
+功能同上,这个比较好理解一点,先找到~all/~,从这里才算开始匹配,替换的时候,调用了substitute函数,将~/~,替换成~_~,~submatch(0)~指的是前面匹配到的部分,也就是~\zs~之后的部分.
+<
+" Substitute by splitting line, then re-joining
+:s#all/#&^M#|s#/#_#g|-j!
+>注释
+:h
+功能同上,先注意一点,这里的^M不是直接输入的,而是按Ctrl+v再按回车,这句一共是三个命令
+第一条命令将~all/~替换成~all/^M~,其实就是加个回车
+第二个命令是将~/~替换成~_~,需要注意,上面的第一个命令执行完之后,光标所在的位置是回车下来的一行,现在在这一行里面替换(因为~s~前面没有~%~,所以只在当前行替换),这样就是除了all后面的~/~,其他的~/~都替换了
+第三个命令是将两行连接起来,单个~j~是连接当前行和下一行,中间加个空格,~-j~表示连接当前行和上一行,中间加空格,但是最后又再加个~!~,表示不用在中间加空格
+这三个命令执行下来,先是分成两行,然后在第二行进行替换,最后两行合并,实现了功能
+<
+" Substitute inside substitute
+:%s/.*/\='cp '.submatch(0).' all/'.substitute(submatch(0),'/','_','g')/
+>注释
+测试不成功,估计作用也和上面的差不多,但是执行的时候提示"多余的尾部字符"
+<
+
+----------------------------------------
+" global command display
+>注释
+:h :g
+下面的是global命令的一些应用,这个是个相当强大的命令,可以参考一个水木的帖子:http://www.newsmth.net/bbscon.php?bid=731&id=32000&ftype=1&num=501
+<
+:g/gladiolli/#               : display with line numbers (YOU WANT THIS!)
+:g/fred.*joe.*dick/         : display all lines fred,joe & dick
+:g/\<fred\>/                 : display all lines fred but not freddy
+>注释
+:h :#
+上面三句都是找到符合条件的行,显示在命令行里面,后面如果有个~#~,则会在每一行前面加个行号
+这里可以有一个小技巧,就是在看一句global命令的时候,如果对其作用范围不太肯定的话,可以先把这个命令后面的{cmd}部分换成~#~,这样就可以看到会被作用到的行,这对理解一些作用范围比较复杂的命令非常有用
+<
+:g/^\s*$/d                   : delete all blank lines
+>注释
+:h :d
+删除只有空白字符的行
+<
+:g!/^dd/d                   : delete lines not containing string
+:v/^dd/d                     : delete lines not containing string
+>注释
+:h :d
+上面两句是等效的,删除所有不以dd开头的行
+<
+:g/fred/,/joe/d             : not line based (very powerfull)
+>注释
+:h range
+~/fred/,/joe/~用两个正则表达式定义了一个范围,显示找满足第一个的行,找到之后,!!从下一行开始!!找满足第二个的行,然后在这些行中执行命令
+<
+:g/fred/,/joe/j             : Join Lines *N*
+>注释
+:h range
+连接两个正则表达式指定范围内的所有行
+<
+:g/-------/.-10,.d           : Delete string & 10 previous lines
+>注释
+:h range
+删除包含~-------~的行和其上的10行,总共11行
+~/-------/~先找到包含~-------~的行,后面的~.-10~向上算10行(注意,此时光标还是停在~-------~这一行),逗号后面是第二个范围,用~.~表示当前行,这样就划定的一个11行的范围,然后用~d~删除
+<
+:g/{/ ,/}/- s/\n\+/\r/g     : Delete empty lines but only between {...}
+>注释
+:h range
+删除{}之间的空行,经实验发现,上面的句子里面的两个空格是没啥作用的,我一开始还以为是啥特殊用法,试了一下,发现去掉也没有影响
+主要看第二个范围后的减号,这个地方省略了数字,相当于~-1~.后面的替换没啥说的,将一个及一个以上的~\n~换成~\r~
+<
+:v/\S/d                     : Delete empty lines (both types)
+>注释
+:h /\S
+删除空白行,注意,这里的~\S~是大写,匹配任意非空白字符,~v/~等价于~g!/~,"否定之否定"
+<
+:v/./,/./-j                 : compress empty lines
+>注释
+:h :j
+~/./~是找任意非空白行,然后从下一行开始,用~/./~找另一个非空白行,再用一个~-~表示回退一行,~j~是合并,这一句也是是将连续的几个空白行合并为一个,不过我暂时还不太理解
+<
+:g/^$/,/./-j                 : compress empty lines
+>注释
+:h
+功能同上,这个可以理解,就是找到一个空行,然后向下找到一个非空行,再回退一行,合并
+<
+:g/<input\|<form/p           : ORing
+>注释
+:h :p
+找到满足要求的行,输出到命令行窗口
+<
+:g/^/put_                   : double space file (pu = put)
+>注释
+:h :put
+每行前面增加一行,经测试,后面的~_~没啥用,去掉也是同样的效果,~put~命令是将一个寄存器的内容粘贴到下一行
+<
+:g/^/m0                     : Reverse file (m = move)
+>注释
+:h :m
+装置文件的所有行,因为g命令执行的时候,是从第一行开始到最后一行,而~m0~是把当前行移动到最顶上,所以全部执行下来,就是把整个文件的所有行颠倒了一下顺序
+<
+:'a,'bg/^/m'b               : Reverse a section a to b
+>注释
+:h :m
+:h {address}
+交换标记a和标记b中间的行,本来我以为最后的命令应该是~m'a~,可是试下来才发现,上面的才是对的,最后做了一下测试,原来标记是会跟着那一行移动的,而且m'b是将那一行移动到标记b所在行的下面,比如X,Y,Z三行,a标记在X,b标记在Z,先对第X行执行~m'b~,变成YZX,在对第Y行操作,变成ZYX,最后对第Z行操作,仍然是ZYX,这样顺序就调换过来了,在这些操作的过程中,标记a始终在X行,标记b始终在Z行
+<
+:g/^/t.                     : duplicate every line
+>注释
+:h :t
+复制所有行,~t~等价于~copy~,是将当前行复制到后面指定的行!!之下!!,比如这里的~.~,指的是当前行,整句的意思就是把当前行复制一份,粘贴在当前行的下一行
+<
+:g/fred/t$                   : copy(transfer) lines matching fred to EOF
+>注释
+:h {address}
+将所有含有fred的行,复制到文件尾部,~t~是复制,~$~指文件末尾
+<
+:g/stage/t'a                 : copy (transfer) lines matching stage to marker a (cannot use .) *C*
+>注释
+:h
+将包含stage的行,复制到标记a的下面
+<
+:g/\(^I[^^I]*\)\{80}/d       : delete all lines containing at least 80 tabs
+>注释
+:h ^I
+删除至少有80个Tab的行,注意,其中的~^I~不是直接输入,而是按~Ctrl+v~再按~Tab~键
+~[^^I]~指的是所有不是Tab键的字符
+<
+" perform a substitute on every other line
+:g/^/ if line('.')%2|s/^/zz /
+>注释
+:h line()
+:h if
+在奇数行的前面加上zz ,~line('.')~是当前行的行数,if就是一个判断语句,只有满足了条件(这里的条件是当前行号不能被2整除),才执行下一条语句
+<
+" match all lines containing "somestr" between markers a & b
+" copy after line containing "otherstr"
+:'a,'bg/somestr/co/otherstr/ : co(py) or mo(ve)
+>注释
+:h co
+:h {address}
+找到并复制所有包含~somestr~的行,然后向下寻找包含~otherstr~的行,粘贴到他的下一行
+~co~是~copy~命令,后面跟一个行号,在本句中是用一个正则表达式向下找第一个满足的行
+<
+" as above but also do a substitution
+:'a,'bg/str1/s/str1/&&&/|mo/str2/
+>注释
+:h mo
+先找到a和b范围内的包含str1的行,然后执行两个命令,第一个命令是把str1复制为3份,第二个命令是将这一行移动到下面能找到~str2~的行后面
+<
+:%norm jdd                   : delete every other line
+>注释
+:h norm
+删除所有偶数行,这里其实就是和我们在普通模式中,不停的按j跳到下一行,然后按dd删除一样是一样的.不过因为前面多了个百分号,变成对全文的所有行进行操作.
+<
+" incrementing numbers (type <c-a> as 5 characters)
+:.,$g/^\d/exe "norm! \<c-a>": increment numbers
+>注释
+:h exe
+从当前行到文件末,寻找在行起始位置是一个数字的行,将其增加1,注意,其中的~<c-a>~是直接输入的
+exe是执行一个命令,norm是执行一个普通模式的命令,~<c-a>~就是~Ctrl+a~,在普通模式,在一个数字上按~Ctrl+a~就可以把数字增大1,不支持浮点数
+<
+:'a,'bg/\d\+/norm! ^A       : increment numbers
+>注释
+:h ^A
+在标记a和标记b中间的数字增加1,注意,~^A~是按~Ctrl+v~再按~Ctrl+a~
+<
+" storing glob results (note must use APPEND) you need to empty reg a first with qaq.
+"save results to a register/paste buffer
+:g/fred/y A                 : append all lines fred to register a
+>注释
+:h :y
+:h "x
+将所有包含fred的行!!添加!!到寄存器a中,注意,~y~后面是大写的~A~,如果是大写的,表示复制的内容是增加到寄存器原来内容的末尾,而不是替代原来的内容,在这个操作以前,如果要清空a寄存器的内容,只要在普通模式按~qaq~
+<
+:g/fred/y A | :let @*=@a     : put into paste buffer
+>注释
+:h @
+前面一句和上面的一样,后面的一句是把a寄存器的内容复制到*寄存器,这个*寄存器就是VIM对外的剪贴板,只有这个寄存器的内容才能在VIM以外的地方可见
+<
+:let @a=''|g/Barratt/y A |:let @*=@a
+>注释
+功能同上,第一句是清空a寄存器的内容
+<
+" filter lines to a file (file must already exist)
+:'a,'bg/^Error/ . w >> errors.txt
+>注释
+:h :w
+:h :w_a
+在标记a和标记b之间,找到所有以Error开头的行,将他们写入到errors.txt文件中
+本句中的几个空格去掉没什么影响,第一个空格前面的部分无须解释,~.~表示本行,是后面的~w~命令的范围,~w>>{filename}~命令是将指定范围的内容添加到后面指定的文件末尾,如果文件不存在,会报错,但是如果在~w~后面加个~!~,就可以在文件不存在的时候,自动建立一个新文件
+<
+" duplicate every line in a file wrap a print '' around each duplicate
+:g/./yank|put|-1s/'/"/g|s/.*/Print '&'/
+>注释
+:h yank
+:h put
+:h :;
+:h range
+找到所有非空行,执行4个命令,~yank~是复制,~put~粘贴在下一行,这句执行完后,光标停在复制出来的那一行,然后第三个命令是到上一行将单引号替换为双引号,如果需要替换,则光标停在上一行,如果不需要替换,光标还是在第二行,第四个命令是在当前行外面加上Print ''.这一句其实不太完美,因为第三句,如果能找到单引号,光标会停在上一行,找不到单引号,光标停在下一行,这样第四句替换的时候,有可能替换的是上一行,也可能是下一行,有两种改进方法,如果是要固定替换第一行,则改成
+~g/./yank|put|-1;s/'/"/g|s/.*/Print '&'/~
+如果要固定替换第二行,则改成
+~g/./yank|put|s/'/"/g|s/.*/Print '&'/~
+固定替换第二行比较简单,去掉-1就可以了,固定替换第一行,是在-1后面加了~;~,这样就无论是否能找到单引号,光标都会停在第一行,具体原因~:h :;~查看
+<
+" replace string with contents of a file, -d deletes the "mark"
+:g/^MARK$/r tmp.txt | -d
+>注释
+:h :r
+将内容为MARK的一行!!替换!!为tmp.txt文件的内容,~r {filename}~是在当前光标的下一行读入指定的文件,读入后,光标停在读入内容的第一行,然后用~-d~删除上一行,也就是内容为MARK的那一行
+<
+" display prettily
+:g/<pattern>/z#.5           : display with context
+>注释
+:h :z
+:h :#
+找到所有满足条件的行,显示其周围的5行(也就是上下各两行,还有本身的一行,如果在文件头,则只有下面两行,如果在文件尾,则只有上两行),~#~是显示行号
+<
+:g/<pattern>/z#.5|echo "=========="   : display beautifully
+>注释
+:h echo
+在上面一句的基础上,增加了一个命令,就是多显示一个分隔线,看起来清楚一些
+<
+" Combining g// with normal mode commands
+:g/|/norm 2f|r*                       : replace 2nd | with a star
+>注释
+:h f
+:h norm
+:h r
+在所有包含~|~的行中,将第二个~|~替换成~*~,~norm~是一个命令,后面的内容就和直接在普通模式输入的效果是一样的,~2f|~是向后找到第二个~|~的位置,~r*~是替换为~*~号.
+<
+"send output of previous global command to a new window
+:nmap <F3>   :redir @a<CR>:g//<CR>:redir END<CR>:new<CR>:put! a<CR><CR>
+>注释
+:h redir
+:h new
+:h put
+将满足上一次global命令的行,复制到一个新的缓冲区
+~redir @a~是重定向下面命令的输出到a寄存器,~redir END~是结束重定向
+~g//~是执行上一次的global命令,但是只是把匹配的行列出来,不执行什么命令,~new~是新建一个缓冲区,~put! a~是将a缓冲区的内容粘贴到当前行的下一行,不过不知道为什么,每次粘贴总会多两行空白行
+<
+----------------------------------------
+" Global combined with substitute (power editing)
+:'a,'bg/fred/s/joe/susan/gic :   can use memory to extend matching
+:/fred/,/joe/s/fred/joe/gic :   non-line based (ultra)
+:/biz/,/any/g/article/s/wheel/bucket/gic:   non-line based *N*
+>注释
+:h range
+上面3句主要都在演示用正则表达式作为{range}的用法,其实就是找满足这两个正则表达式的两行之间的内容,然后执行global命令
+<
+----------------------------------------
+" Find fred before beginning search for joe
+:/fred/;/joe/-2,/sid/+3s/sally/alley/gIC
+>注释
+:h range
+先说明一下,最后的~IC~是错误的,要换成小写的
+这个也是要演示{range}的用法,先是找fred,再在从下一行开始找joe,找到后向上数2行,开始找sid,找到sid之后,刚才走过的整个范围就是执行命令的范围了,要想具体看看范围,可以先输入几行测试的代码,然后用~g/fred/;/joe/-2,/sid/+3#|echo '===================='~看看到底选中了哪些范围.
+<
+----------------------------------------
+" create a new file for each line of file eg 1.txt,2.txt,3,txt etc
+:g/^/exe ".w ".line(".").".txt"
+>注释
+:h :w
+:h line()
+对所有行执行命令,将每一行写入以其行号为文件名,txt为扩展名的文件中
+exe命令后面要跟一个字符串,~.w~上面解释过了.~line(".")~也解释过了,主要是他前后的~.~,这个其实是字符串的连接符号,这样的用法就可以在执行的命令中加入一些变量的值
+<
+----------------------------------------
+" Summary of editing repeats *N*
+.       last edit (magic dot)
+:&     last substitute
+:%&     last substitute every line
+:%&gic last substitute every line confirm
+g%     normal mode repeat last substitute
+g&     last substitute on all lines
+@@     last recording
+@:     last command-mode command
+:!!     last :! command
+:~     last substitute
+:help repeating
+----------------------------------------
+" Summary of repeated searches
+;       last f, t, F or T
+,       last f, t, F or T in opposite direction
+n       last / or ? search
+N       last / or ? search in opposite direction
+>注释
+:h &
+:h @
+:h :!
+:h :~
+:h :%
+:h ;
+:h n
+上面的应该没啥需要解释的,有啥不清楚的直接~:h~就好了
+<
+
+下面是其他部分的链接
+
+[原创]Best of Vim Tips注释(1)
+[原创]Best of Vim Tips注释(2)
+
+--------------------------------------------------------------------------------------------------------------------------------
+

@@ -1,0 +1,420 @@
+# main()
+snippet main
+	int main(int argc, const char *argv[])
+	{
+		${0}
+		return 0;
+	}
+#C_STD_LIB
+snippet malloc
+	${1:type}* ${2:variable} = ($1*)malloc(sizeof($1) * ${3:n});
+# #include <...>
+snippet Inc
+	#include <${1:`Filename("$1.h")`}>${0}
+snippet inc
+	#include "${1:`Filename("$1.h")`}"${0}
+# #ifndef ... #define ... #endif
+snippet Def
+	#define${1}
+snippet udef
+	#undef${1}
+snippet def
+	#ifndef $1
+	#define ${1:SYMBOL} ${2:value}
+	#endif${3}
+snippet if0
+	#if 0
+		${1}
+	#endif${0}
+#${1:`Filename('$1', 'name')`}_T {
+snippet ifd
+	#ifdef ${1:SYMBOL}
+		${2}
+	#endif${0}
+snippet ifndef
+	#ifndef $1
+	#define ${1:SYMBOL} ${2:value}
+	#else
+	#define ${3:SYMBOL}
+	#endif${0}
+snippet ifnd
+	#ifndef $1_EXT
+	#define ${1:`toupper(Filename('$1', 'name'))`}_EXT extern
+	#else
+	#define $1_EXT
+	#endif${0}
+snippet #if
+	#if ${1:FOO}
+		${2}
+	#endif
+#pragma
+snippet #p
+	#pragma${1}
+#import
+snippet #im
+	#import <${1:var}>${1}
+# Header Include-Guard
+# (the randomizer code is taken directly from TextMate; it could probably be
+# cleaner, I don't know how to do it in vim script)
+snippet once
+	#ifndef ${1:`toupper('_'.Filename('', 'UNTITLED').'_'.'H')`}
+	#define $1
+
+	${2}
+
+	#endif /*!< END_$1 */${0}
+snippet once1
+	#ifndef ${1:`toupper(Filename('', 'UNTITLED').'_'.system("/usr/bin/ruby -e 'print (rand * 2821109907455).round.to_s(36)'"))`}
+
+	#define $1
+
+	${2}
+
+	#endif /* end of include guard: $1 */
+# If Condition
+snippet if
+	if (${1:/* condition */}) {
+		${2:/* code */}
+	}${0}
+snippet else
+	else {
+		${1}
+	}${0}
+snippet elseif
+	else if (${1:/* condition */}) {
+	        ${2}
+	}${0}
+snippet ifelse
+	if (${1:/* condition */}) {
+		${2:/* code */}
+	} else {
+		${3:/* code */}
+	}${0}
+snippet ifs
+	if (${1:/* condition */}) {
+		${2:/* code */}
+	} else if {
+		${3:/* code */}
+	} else if {
+		${4:/* code */}
+	} else {
+		${5:/* code */}
+	}${0}
+# Tertiary conditional
+snippet t
+	${1:/* condition */} ? ${2:a} : ${3:b}
+snippet conditional
+	${1:/* condition */} ? ${2:a} : ${3:b}
+# Do While Loop
+snippet do
+	do {
+		${2:/* code */}
+	} while (${1:/* condition */});${0}
+# While Loop
+snippet wh
+	while (${1:/* condition */}) {
+		${2:/* code */}
+	};${0}
+# For Loop
+snippet for
+	for (${2:i} = 0; $2 < ${1:count}; $2${3:++}) {
+		${4:####}
+	}${0}
+#snippet for
+#	for (${1} = 0; $1 < ${2}; $1++) {
+#		${0}
+#	}
+# Custom For Loop
+snippet forr
+	for (${1:i} = ${2:0}; $1 > 0; $1${3:--}) {
+		${4:####}
+	}${0}
+snippet for_CPP11
+	for (${1:var} : ${2:container}) {
+		${3:####}
+	}${0}
+# Function
+snippet fun
+	${1:void} ${2:function_name}(${3:void})
+	{
+		${4:####}
+	}${0}
+snippet function
+	${1:void} ${2:func_name}(${3}) {
+		${####}
+	}${0}
+# Function Declaration
+snippet fund
+	${1:void} ${2:function_name}(${3:void});${0}
+# Typedef
+snippet td
+	typedef ${1:int} ${2:MyCustomType};${0}
+#snippet typedef
+#	typedef ${1:int} ${2:MyCustomType};${0}
+snippet typedef
+	typedef ${1:base_type} ${2:custom_type};${0}
+# Struct
+snippet st
+	struct ${1:`Filename('$1', 'name')`}_T {
+		${2:/* data */}
+	}${3: /* optional variable list */};${0}
+snippet struct
+	struct ${1:`Filename('$1_t', 'name')`} {
+		${2:/* data */}
+	}${3: /* optional variable list */};${0}
+# Typedef struct
+snippet tds
+	typedef struct _$1_t {
+		${2:/* data */}
+	} ${1:`Filename('$1', 'name')`}_t;${0}
+snippet struct_typedef
+	typedef struct ${2:_$1}_t {
+		${3:/* data */}
+	} ${1:`Filename('$1_t', 'name')`}_t;${0}
+# Typdef enum
+snippet tde
+	typedef enum _$1 {
+		${2:/* data */}
+	} ${1:`Filename('$1', 'name')`}_TYPES;${0}
+snippet enum
+	enum ${2:_$1 }{
+		${3:/* data */}
+	} ${1:`Filename('$1', 'name')`}_TYPES;${0}
+# Switch case
+snippet sw
+	switch (${1:var}) {
+	case ${2:val}:
+		${6:/* code */}
+	break;
+	case ${3:val}:
+		${7:/* code */}
+	break;
+	case ${4:val} :
+		${8:/* code */}
+	break;
+	case ${5:val} :
+		${9:/* code */}
+	break;
+	default:
+		${10:/* code */}
+	break;
+	}${0};
+snippet switch
+	switch (${1:var}) {
+	case ${2:val}:
+		${6:/* code */}
+	break;
+	case ${3:val}:
+		${7:/* code */}
+	break;
+	case ${4:val} :
+		${8:/* code */}
+	break;
+	case ${5:val} :
+		${9:/* code */}
+	break;
+	default:
+		${10:/* code */}
+	break;
+	}${0};
+snippet ca
+	case (${1:val}):
+		(${2:/* code */});
+	break;${0}
+snippet case
+	case (${1:val}):
+		(${2:/* code */});
+	break;#{0}
+# printf
+# unfortunately version this isn't as nice as TextMates's, given the lack of a
+# dynamic `...`
+snippet pr
+	printf("${1:%s}\n"${2});${0}
+snippet printf
+	printf("${1:%s}\n"${2});${0}
+
+# fprintf (again, this isn't as nice as TextMate's version, but it works)
+snippet fpr
+	fprintf(${1:stderr}, "${2:%s}\n"${3});${0}
+snippet fprintf
+	fprintf(${1:stderr}, "${2:%s}\n"${3});${0}
+snippet .
+	[${1}]${2}
+
+snippet sock
+	socket(AF_INET, SOCK_STREAM, 0);
+snippet un
+	unsigned ${1}
+snippet sizeof
+	sizeof(${1})${0}
+snippet size
+	sizeof(${1})${0}
+# doxfile format style
+snippet dox
+	//! \brief ${1:TBD}
+snippet doxfront
+	//! \brief ${1:TBD}
+snippet doxback
+	//!< ${1:TBD}
+snippet doxfun
+	/////////////////////////////////////////////////////////////////////////////////
+	//! \brief ${1:<comment>}
+	//!
+	//! \fn  Function ${12:comment}
+	//! This function will ${2:<comment>}
+	//!
+	//!
+	//! \param[in]  ${3:var}  ${9:comment}
+	//! \param[in]  ${4:var}  ${10:comment}
+	//! \param[in]  ${5:var}  ${11:comment}
+	//!
+	//! \return     ${6:var}
+	//!             ${7:comment}
+	//!             ${8:comment}
+	//!${0}
+	/////////////////////////////////////////////////////////////////////////////////
+#g: in vimrc [major.minor.bugfix]
+snippet doxfile
+	////////////////////////////////////////////////////////////////////////////////
+	//! \addtogroup `Filename('', 'name')`
+	//! @{
+	//
+	// Copyright (c) 2011-2012 OOZIC, Inc.
+	//
+	//! \file    `Filename('', 'name')`.${1:<suffix>}
+	//! \brief   ${2:<comment>}
+	//! \author  ${3:`g:snips_author`}
+	//! \version [${4:major}.${5:minor}.${6:bugfix}]
+	//! \date    ${7:: `strftime("%B %d, %Y")`}
+	//! \Last Modified: ${8: `strftime("%d/%m/%y %H:%M:%S")`}
+	//!${0}
+	////////////////////////////////////////////////////////////////////////////////
+# uC-OSII -- Data Type
+snippet BOOLEAN
+snippet INT8U
+snippet INT8S
+snippet INT16U
+snippet INT16S
+snippet INT32U
+snippet INT32S
+snippet FP32
+snippet FP64
+snippet BYTE
+snippet UBYTE
+snippet WORD
+snippet UWORD
+snippet LONG
+snippet ULONG
+snippet USHORT
+snippet UCHAR
+snippet ui
+	unsigned int ${1}
+snippet ul
+	unsigned long ${1}
+snippet us
+	unsigned short ${1}
+snippet uc
+	unsigned char ${1}
+snippet u1
+	uint8_t ${1}
+snippet u2
+	uint16_t ${1}
+snippet u3
+	uint32_t ${1}
+snippet i1
+	INT8U ${1}
+snippet i2
+	INT16U ${1}
+snippet i3
+	INT32U ${1}
+snippet N
+	NULL${0}
+snippet nn
+	!= NULL${0}
+snippet n0
+	!= 0${0}
+snippet /*
+	/*!< ${1:<comment>} */${0}
+# linux  sync atom types to kernel types
+#typedef __kernel_fd_set  fd_set
+snippet fd_set
+snippet dev_t
+snippet ino_t
+snippet mode_t
+snippet umode_t
+snippet nlink_t
+snippet off_t
+snippet pid_t
+snippet daddr_t
+snippet key_t
+snippet suseconds_t
+snippet timer_t
+snippet clockid_t
+snippet mqd_t
+snippet bool
+snippet uid_t
+snippet gid_t
+snippet uid16_t
+snippet gid16_t
+snippet uintptr_t
+snippet old_uid_t
+snippet old_gid_t
+snippet loff_t
+snippet ssize_t
+snippet ptrdiff_t
+snippet time_t
+snippet clock_t
+snippet caddr_t
+#/* bsd */
+snippet u_char
+snippet u_short
+snippet u_int
+snippet u_long
+#/* sysv */
+snippet unchar
+snippet ushort
+snippet uint
+snippet ulong
+#ifndef __BIT_TYPES_DEFINED__
+#define __BIT_TYPES_DEFINED__
+snippet __u8
+snippet __s8
+snippet __u16
+snippet __s16
+snippet __u32
+snippet __s32
+snippet u_int8_t
+snippet int8_t
+snippet u_int16_t
+snippet int16_t
+snippet u_int32_t
+snippet int32_t
+#endif /* !(__BIT_TYPES_DEFINED__) */
+snippet uint8_t
+snippet uint16_t
+snippet uint32_t
+#if defined(__GNUC__)
+snippet uint64_t
+snippet u_int64_t
+snippet int64_t
+#endif
+snippet sector_t
+snippet blkcnt_t
+snippet pgoff_t
+snippet dma_addr_t
+snippet __attribute__((bitwise))
+snippet __bitwise__
+snippet __le16
+snippet __be16
+snippet __le32
+snippet __be32
+snippet __le64
+snippet __be64
+snippet __sum16
+snippet __wsum
+snippet __attribute__((aligned(8)))
+snippet phys_addr_t
+snippet resource_size_t
+snippet irq_hw_number_t
+#endif /* _LINUX_TYPES_H */
+snippet size_t
